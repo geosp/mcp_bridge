@@ -1,0 +1,6 @@
+{
+  "url": "https://api.example.com/mcp",
+  "headers": {
+    "Authorization": "Bearer YOUR_TOKEN_HERE"
+  }
+}

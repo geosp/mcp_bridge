@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "my-remote-server": {
+      "command": "mcp-http-bridge",
+      "args": []
+    }
+  }
+}
