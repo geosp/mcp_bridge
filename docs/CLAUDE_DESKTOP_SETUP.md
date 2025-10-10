@@ -38,7 +38,34 @@ pip install mcp-bridge
 
 ## Setup Steps
 
-### 1. Create Your Bridge Configuration
+### 1. Install MCP Bridge from GitHub using uv
+
+Use `uv` to install mcp-bridge directly from GitHub:
+
+```bash
+# Install from GitHub repository
+uv pip install git+https://github.com/geosp/mcp-bridge.git
+
+# Verify installation
+mcp-bridge --version
+which mcp-bridge
+```
+
+This installs mcp-bridge into your local Python environment managed by `uv`.
+
+**Optional: Install in a specific environment**
+```bash
+# Create a dedicated virtual environment
+uv venv ~/.venvs/mcp-bridge
+
+# Install into that environment
+uv pip install --python ~/.venvs/mcp-bridge/bin/python git+https://github.com/geosp/mcp-bridge.git
+
+# The binary will be at:
+# ~/.venvs/mcp-bridge/bin/mcp-bridge
+```
+
+### 2. Create Your Bridge Configuration
 
 Create a configuration file for your remote MCP server with your connection details and credentials.
 
@@ -54,21 +81,21 @@ Create a configuration file for your remote MCP server with your connection deta
 
 Save this file in a secure location (e.g., `~/mcp-configs/weather.json`).
 
-### 2. Configure Claude Desktop
+### 3. Configure Claude Desktop
 
-#### Option A: Using uvx with GitHub (Recommended)
+Now configure Claude Desktop to use the installed mcp-bridge.
 
-This approach automatically installs MCP Bridge from GitHub - no manual installation needed!
+#### Option A: Using the installed command directly (Recommended)
 
-**macOS:**
+If you installed globally or can access `mcp-bridge` from your PATH:
+
+**macOS/Linux:**
 ```json
 {
   "mcpServers": {
     "weather-server": {
-      "command": "uvx",
+      "command": "mcp-bridge",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
         "--config", "/Users/yourusername/mcp-configs/weather.json"
       ]
     }
@@ -81,10 +108,8 @@ This approach automatically installs MCP Bridge from GitHub - no manual installa
 {
   "mcpServers": {
     "weather-server": {
-      "command": "uvx",
+      "command": "mcp-bridge",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
         "--config", "C:\\Users\\yourusername\\mcp-configs\\weather.json"
       ]
     }
@@ -92,15 +117,52 @@ This approach automatically installs MCP Bridge from GitHub - no manual installa
 }
 ```
 
-**Benefits:**
-- No manual installation required
-- Always uses the latest version from GitHub
-- Isolated environment per run
-- Easy to update (just restart Claude Desktop)
+#### Option B: Using full path to installed binary
 
-#### Option B: Using uv with Local Development
+If Claude Desktop can't find `mcp-bridge`, use the full path:
 
-For local development or modifications:
+**Find the path:**
+```bash
+which mcp-bridge
+# macOS/Linux: Usually ~/.local/bin/mcp-bridge or ~/.venvs/mcp-bridge/bin/mcp-bridge
+```
+
+```powershell
+where.exe mcp-bridge
+# Windows: Usually C:\Users\yourusername\.local\bin\mcp-bridge.exe
+```
+
+**macOS/Linux:**
+```json
+{
+  "mcpServers": {
+    "weather-server": {
+      "command": "/Users/yourusername/.local/bin/mcp-bridge",
+      "args": [
+        "--config", "/Users/yourusername/mcp-configs/weather.json"
+      ]
+    }
+  }
+}
+```
+
+**Windows:**
+```json
+{
+  "mcpServers": {
+    "weather-server": {
+      "command": "C:\\Users\\yourusername\\.local\\bin\\mcp-bridge.exe",
+      "args": [
+        "--config", "C:\\Users\\yourusername\\mcp-configs\\weather.json"
+      ]
+    }
+  }
+}
+```
+
+#### Option C: Using uv run (if not in PATH)
+
+Use `uv run` to execute the installed package:
 
 **macOS/Linux:**
 ```json
@@ -109,7 +171,6 @@ For local development or modifications:
     "weather-server": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/mcp-bridge",
         "run",
         "mcp-bridge",
         "--config", "/Users/yourusername/mcp-configs/weather.json"
@@ -126,7 +187,6 @@ For local development or modifications:
     "weather-server": {
       "command": "uv",
       "args": [
-        "--directory", "C:\\path\\to\\mcp-bridge",
         "run",
         "mcp-bridge",
         "--config", "C:\\Users\\yourusername\\mcp-configs\\weather.json"
@@ -136,49 +196,28 @@ For local development or modifications:
 }
 ```
 
-#### Option C: Using Installed Package (pip)
+### 4. Multiple Servers Setup
 
-If you installed with pip:
+You can configure multiple remote servers by creating separate config files:
 
 ```json
 {
   "mcpServers": {
     "weather-server": {
       "command": "mcp-bridge",
-      "args": ["--config", "/path/to/weather.json"]
-    }
-  }
-}
-```
-
-### 3. Multiple Servers Setup
-
-You can configure multiple remote servers:
-
-```json
-{
-  "mcpServers": {
-    "weather-server": {
-      "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
         "--config", "/Users/yourusername/mcp-configs/weather.json"
       ]
     },
     "database-server": {
-      "command": "uvx",
+      "command": "mcp-bridge",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
         "--config", "/Users/yourusername/mcp-configs/database.json"
       ]
     },
     "analytics-server": {
-      "command": "uvx",
+      "command": "mcp-bridge",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
         "--config", "/Users/yourusername/mcp-configs/analytics.json"
       ]
     }
@@ -186,68 +225,37 @@ You can configure multiple remote servers:
 }
 ```
 
-## Finding the uvx Path
+## Updating MCP Bridge
 
-On some systems, you may need to specify the full path to `uvx`:
+To update to the latest version from GitHub:
 
-**macOS/Linux:**
 ```bash
-which uvx
-# Usually: /Users/yourusername/.local/bin/uvx or ~/.cargo/bin/uvx
+# Update the installation
+uv pip install --upgrade git+https://github.com/geosp/mcp-bridge.git
+
+# Verify new version
+mcp-bridge --version
+
+# Restart Claude Desktop to use the updated version
 ```
 
-**Windows:**
-```powershell
-where.exe uvx
-# Usually: C:\Users\yourusername\.local\bin\uvx.exe
-```
+### Installing Specific Versions
 
-Use the full path in your configuration if needed:
-
-```json
-{
-  "mcpServers": {
-    "weather-server": {
-      "command": "/Users/yourusername/.local/bin/uvx",
-      "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
-        "--config", "/Users/yourusername/mcp-configs/weather.json"
-      ]
-    }
-  }
-}
-```
-
-## Using Specific Versions
-
-To use a specific version, branch, or tag from GitHub:
+To install a specific version, branch, or commit:
 
 **Specific tag/version:**
-```json
-"args": [
-  "--from", "git+https://github.com/geosp/mcp-bridge@v0.2.0",
-  "mcp-bridge",
-  "--config", "/path/to/weather.json"
-]
+```bash
+uv pip install git+https://github.com/geosp/mcp-bridge.git@v0.2.0
 ```
 
 **Specific branch:**
-```json
-"args": [
-  "--from", "git+https://github.com/geosp/mcp-bridge@main",
-  "mcp-bridge",
-  "--config", "/path/to/weather.json"
-]
+```bash
+uv pip install git+https://github.com/geosp/mcp-bridge.git@main
 ```
 
 **Specific commit:**
-```json
-"args": [
-  "--from", "git+https://github.com/geosp/mcp-bridge@abc1234",
-  "mcp-bridge",
-  "--config", "/path/to/weather.json"
-]
+```bash
+uv pip install git+https://github.com/geosp/mcp-bridge.git@abc1234
 ```
 
 ## Troubleshooting
@@ -269,43 +277,29 @@ Get-Content -Path "$env:APPDATA\Claude\logs\mcp*.log" -Wait
 tail -f ~/.config/Claude/logs/mcp*.log
 ```
 
-### uvx command not found
+### mcp-bridge command not found
 
-If you get "command not found" for `uvx`:
+If you get "command not found" for `mcp-bridge`:
 
-1. **Verify uv is installed:**
+1. **Verify it's installed:**
    ```bash
-   uv --version
+   uv pip list | grep mcp-bridge
    ```
 
-2. **Find the full path:**
+2. **Find where it's installed:**
    ```bash
-   which uvx  # macOS/Linux
-   where.exe uvx  # Windows
+   which mcp-bridge  # macOS/Linux
+   where.exe mcp-bridge  # Windows
    ```
 
-3. **Use the full path in your config:**
+3. **Use the full path in your Claude Desktop config:**
    ```json
-   "command": "/Users/yourusername/.local/bin/uvx"
+   "command": "/Users/yourusername/.local/bin/mcp-bridge"
    ```
 
-4. **Reinstall uv if needed:**
+4. **Reinstall if needed:**
    ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
-
-### Git operation failed
-
-If you see "Git operation failed" in the logs:
-
-1. **Check your network connection** - ensure you can access GitHub
-2. **Verify the repository URL:**
-   ```bash
-   git ls-remote https://github.com/geosp/mcp-bridge
-   ```
-3. **Try using a specific version:**
-   ```json
-   "--from", "git+https://github.com/geosp/mcp-bridge@v0.2.0"
+   uv pip install git+https://github.com/geosp/mcp-bridge.git
    ```
 
 ### Config file not found
@@ -345,15 +339,11 @@ If you see connection errors like "nodename nor servname provided":
 
 Test the bridge outside of Claude Desktop:
 
-**Using uvx:**
-```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' | uvx --from git+https://github.com/geosp/mcp-bridge mcp-bridge --config /path/to/weather.json
-```
-
-**Using installed package:**
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' | mcp-bridge --config /path/to/weather.json
 ```
+
+You should see a response with the server's capabilities and a session ID.
 
 ## Verification
 
@@ -388,10 +378,22 @@ Here's a complete, tested configuration:
 {
   "mcpServers": {
     "weather-server": {
-      "command": "/Users/yourusername/.local/bin/uvx",
+      "command": "mcp-bridge",
       "args": [
-        "--from", "git+https://github.com/geosp/mcp-bridge",
-        "mcp-bridge",
+        "--config", "/Users/yourusername/mcp-configs/weather.json"
+      ]
+    }
+  }
+}
+```
+
+Or with full path if needed:
+```json
+{
+  "mcpServers": {
+    "weather-server": {
+      "command": "/Users/yourusername/.local/bin/mcp-bridge",
+      "args": [
         "--config", "/Users/yourusername/mcp-configs/weather.json"
       ]
     }
@@ -457,24 +459,6 @@ The bridge automatically manages session IDs:
 3. Session persists for the lifetime of the bridge process
 4. Each Claude Desktop restart creates a new session
 
-## Updating MCP Bridge
-
-### When using uvx with GitHub
-
-Simply restart Claude Desktop - `uvx` will pull the latest version automatically!
-
-To force a specific version:
-```json
-"--from", "git+https://github.com/geosp/mcp-bridge@v0.2.0"
-```
-
-### When using local installation
-
-```bash
-pip install --upgrade mcp-bridge
-# or
-uv pip install --upgrade mcp-bridge
-```
 
 ## Security Best Practices
 
