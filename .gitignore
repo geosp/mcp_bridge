@@ -42,3 +42,19 @@ config.json
 
 # Logs
 *.log
+
+# Build artifacts
+*.egg-info/
+build/
+dist/
+
+# User configs (don't commit personal tokens)
+src/mcp_bridge/config.json
+
+# Build artifacts
+*.egg-info/
+build/
+dist/
+
+# User configs (don't commit personal tokens)
+src/mcp_bridge/config.json

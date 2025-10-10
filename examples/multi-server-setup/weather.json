@@ -1,0 +1,6 @@
+{
+  "url": "http://agentgateway.mixwarecs-home.net/weather-mcp",
+  "headers": {
+    "Authorization": "Bearer iaOPJQ29pv9gVVepAA89ZCLvM7eDbc4dbPGRxLl6dtLCFxNRNgU5Ygr0hMlP"
+  }
+}

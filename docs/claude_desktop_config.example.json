@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "weather-gateway": {
+      "command": "mcp-bridge",
+      "args": ["--config", "weather.json"]
+    }
+  }
+}

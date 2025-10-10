@@ -1,0 +1,7 @@
+{
+  "url": "http://database-api.example.com/mcp",
+  "headers": {
+    "Authorization": "Bearer YOUR_DATABASE_API_TOKEN",
+    "X-Database-Name": "production"
+  }
+}

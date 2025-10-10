@@ -19,30 +19,58 @@ MCP Bridge solves a common integration challenge: **MCP clients like Claude Desk
 
 ## Installation
 
-### Using uv (recommended)
+### Using pip (recommended)
+
+```bash
+pip install mcp-bridge
+```
+
+### Using uv
 
 ```bash
 pip install uv
-uv pip install mcp-sse-bridge
-```
-
-### Using pip
-
-```bash
-pip install mcp-sse-bridge
+uv pip install mcp-bridge
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/yourusername/mcp-bridge.git
+git clone https://github.com/geosp/mcp-bridge.git
 cd mcp-bridge
 uv pip install -e .
 ```
 
-## Configuration
+After installation, verify it's working:
 
-Create a `config.json` file in the `mcp_http_bridge` directory:
+```bash
+mcp-bridge --version
+```
+
+## Quick Start
+
+### 1. Initialize Configuration
+
+Create your first config file:
+
+```bash
+mcp-bridge init
+```
+
+This creates `~/.config/mcp-bridge/config.json` with an example configuration.
+
+### 2. Edit Configuration
+
+Edit the config file with your server details:
+
+```bash
+# macOS/Linux
+vi ~/.config/mcp-bridge/config.json
+
+# Or use your preferred editor
+code ~/.config/mcp-bridge/config.json
+```
+
+Configuration format:
 
 ```json
 {
@@ -53,30 +81,98 @@ Create a `config.json` file in the `mcp_http_bridge` directory:
 }
 ```
 
-### Configuration Options
-
+**Configuration Options:**
 - `url` (required): The HTTP/SSE endpoint of your remote MCP server
 - `headers` (optional): HTTP headers to include with requests (e.g., authentication tokens)
 
+### 3. Test the Bridge
+
+Test your configuration with a simple initialize request:
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' | mcp-bridge
+```
+
+You should see a JSON response from your server.
+
+## Multi-Server Configuration
+
+You can configure multiple servers with named configs:
+
+```bash
+# Create configs for different servers
+mcp-bridge init --name weather
+mcp-bridge init --name database
+mcp-bridge init --name analytics
+
+# List all configs
+mcp-bridge list-configs
+
+# Use a specific config
+mcp-bridge --config weather.json
+```
+
 ## Usage with Claude Desktop
 
-Add this to your Claude Desktop configuration file:
+### Single Server Setup
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+1. First, create and configure your bridge config:
+
+```bash
+mcp-bridge init
+# Edit ~/.config/mcp-bridge/config.json with your server details
+```
+
+2. Add this to your Claude Desktop configuration file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "remote-server": {
-      "command": "mcp-http-bridge",
+      "command": "mcp-bridge",
       "args": []
     }
   }
 }
 ```
 
-Make sure the bridge's `config.json` is properly configured before starting Claude Desktop.
+3. Restart Claude Desktop
+
+### Multiple Servers Setup
+
+For multiple remote servers:
+
+1. Create named configs for each server:
+
+```bash
+mcp-bridge init --name weather
+mcp-bridge init --name database
+# Edit each config file with appropriate server details
+```
+
+2. Update Claude Desktop config:
+
+```json
+{
+  "mcpServers": {
+    "weather-server": {
+      "command": "mcp-bridge",
+      "args": ["--config", "weather.json"]
+    },
+    "database-server": {
+      "command": "mcp-bridge",
+      "args": ["--config", "database.json"]
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop
+
+Each bridge instance will connect to its configured remote server independently.
 
 ## How It Works
 
@@ -134,22 +230,62 @@ See the `examples/` directory for sample configurations:
 
 ### Claude Desktop not finding the bridge
 
-- Verify `mcp-http-bridge` is in your PATH: `which mcp-http-bridge`
-- Try using the full path to the script in Claude Desktop config
+- Verify `mcp-bridge` is in your PATH: `which mcp-bridge`
+- If using a virtual environment, use the full path:
+  ```json
+  {
+    "mcpServers": {
+      "remote-server": {
+        "command": "/full/path/to/mcp-bridge",
+        "args": []
+      }
+    }
+  }
+  ```
 - Check Claude Desktop logs for error messages
+
+### Config file not found
+
+```bash
+# Check what configs exist
+mcp-bridge list-configs
+
+# Create a new config if needed
+mcp-bridge init
+```
 
 ### Enable debug logging
 
-The bridge logs to stderr. To capture logs:
+The bridge logs to stderr. Claude Desktop captures these logs. You can also test manually:
 
 ```bash
-mcp-http-bridge 2> bridge.log
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | mcp-bridge 2> bridge.log
+```
+
+## CLI Commands
+
+```bash
+# Show version
+mcp-bridge --version
+
+# Initialize a new config
+mcp-bridge init
+mcp-bridge init --name myserver
+
+# List all configs
+mcp-bridge list-configs
+
+# Run with default config
+mcp-bridge
+
+# Run with specific config
+mcp-bridge --config weather.json
 ```
 
 ## Future Enhancements
 
 - [ ] WebSocket transport support
-- [ ] Multiple endpoint configurations
+- [x] Multiple server configurations (completed in v0.2.0)
 - [ ] Request/response logging options
 - [ ] Retry logic and connection pooling
 - [ ] Health check endpoints

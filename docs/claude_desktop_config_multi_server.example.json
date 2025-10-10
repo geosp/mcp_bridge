@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "weather-gateway": {
+      "command": "mcp-bridge",
+      "args": ["--config", "weather.json"]
+    },
+    "database-server": {
+      "command": "mcp-bridge",
+      "args": ["--config", "database.json"]
+    },
+    "local-test": {
+      "command": "mcp-bridge",
+      "args": ["--config", "local-test.json"]
+    }
+  }
+}
