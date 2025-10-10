@@ -44,7 +44,7 @@ Use `uv` to install mcp-bridge directly from GitHub:
 
 ```bash
 # Install from GitHub repository
-uv pip install git+https://github.com/geosp/mcp-bridge.git
+uv pip install git+https://github.com/geosp/mcp_bridge.git
 
 # Verify installation
 mcp-bridge --version
@@ -59,7 +59,7 @@ This installs mcp-bridge into your local Python environment managed by `uv`.
 uv venv ~/.venvs/mcp-bridge
 
 # Install into that environment
-uv pip install --python ~/.venvs/mcp-bridge/bin/python git+https://github.com/geosp/mcp-bridge.git
+uv pip install --python ~/.venvs/mcp-bridge/bin/python git+https://github.com/geosp/mcp_bridge.git
 
 # The binary will be at:
 # ~/.venvs/mcp-bridge/bin/mcp-bridge
@@ -231,7 +231,7 @@ To update to the latest version from GitHub:
 
 ```bash
 # Update the installation
-uv pip install --upgrade git+https://github.com/geosp/mcp-bridge.git
+uv pip install --upgrade git+https://github.com/geosp/mcp_bridge.git
 
 # Verify new version
 mcp-bridge --version
@@ -245,17 +245,17 @@ To install a specific version, branch, or commit:
 
 **Specific tag/version:**
 ```bash
-uv pip install git+https://github.com/geosp/mcp-bridge.git@v0.2.0
+uv pip install git+https://github.com/geosp/mcp_bridge.git@v0.2.0
 ```
 
 **Specific branch:**
 ```bash
-uv pip install git+https://github.com/geosp/mcp-bridge.git@main
+uv pip install git+https://github.com/geosp/mcp_bridge.git@main
 ```
 
 **Specific commit:**
 ```bash
-uv pip install git+https://github.com/geosp/mcp-bridge.git@abc1234
+uv pip install git+https://github.com/geosp/mcp_bridge.git@abc1234
 ```
 
 ## Troubleshooting
@@ -275,6 +275,46 @@ Get-Content -Path "$env:APPDATA\Claude\logs\mcp*.log" -Wait
 **Linux:**
 ```bash
 tail -f ~/.config/Claude/logs/mcp*.log
+```
+
+### Git authentication error
+
+If you get "could not read Username" or "terminal prompts disabled":
+
+**Most common cause: Wrong repository URL**
+
+Make sure you're using the correct repository name with underscore:
+```bash
+# Correct (with underscore):
+uv pip install git+https://github.com/geosp/mcp_bridge.git
+
+# Incorrect (with dash):
+uv pip install git+https://github.com/geosp/mcp-bridge.git  # This will fail!
+```
+
+**For private repositories:**
+
+**Solution 1: Use HTTPS with token**
+```bash
+# Create a GitHub personal access token at https://github.com/settings/tokens
+# Then use:
+uv pip install git+https://YOUR_TOKEN@github.com/geosp/mcp_bridge.git
+```
+
+**Solution 2: Use SSH instead**
+```bash
+# Ensure you have SSH keys set up with GitHub
+uv pip install git+ssh://git@github.com/geosp/mcp_bridge.git
+```
+
+**Solution 3: Clone and install locally**
+```bash
+# Clone the repository first
+git clone https://github.com/geosp/mcp_bridge.git
+cd mcp_bridge
+
+# Install from local directory
+uv pip install .
 ```
 
 ### mcp-bridge command not found
@@ -299,7 +339,7 @@ If you get "command not found" for `mcp-bridge`:
 
 4. **Reinstall if needed:**
    ```bash
-   uv pip install git+https://github.com/geosp/mcp-bridge.git
+   uv pip install git+https://github.com/geosp/mcp_bridge.git
    ```
 
 ### Config file not found

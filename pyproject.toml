@@ -28,10 +28,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/geosp/mcp-bridge"
-Documentation = "https://github.com/geosp/mcp-bridge#readme"
-Repository = "https://github.com/geosp/mcp-bridge"
-Issues = "https://github.com/geosp/mcp-bridge/issues"
+Homepage = "https://github.com/geosp/mcp_bridge"
+Documentation = "https://github.com/geosp/mcp_bridge#readme"
+Repository = "https://github.com/geosp/mcp_bridge"
+Issues = "https://github.com/geosp/mcp_bridge/issues"
 
 [project.scripts]
 mcp-bridge = "mcp_bridge.cli:main"
