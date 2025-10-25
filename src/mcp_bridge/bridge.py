@@ -72,14 +72,19 @@ class MCPHTTPBridge:
     async def send_message(self, message: dict):
         """Send a message and read SSE response"""
         try:
+            method = message.get('method', 'unknown')
+            msg_id = message.get('id')
+
+            # Debug: log the raw message for tools/call
+            if method == 'tools/call':
+                log(f"Raw tools/call message: {json.dumps(message)}")
+
             # Fix stringified parameters (workaround for Claude Desktop bug)
             if 'arguments' in message.get('params', {}):
                 message['params']['arguments'] = deserialize_stringified_params(
                     message['params']['arguments']
                 )
 
-            method = message.get('method', 'unknown')
-            msg_id = message.get('id')
             log(f"Sending: {method} (id={msg_id})")
             
             # Build headers
