@@ -242,9 +242,9 @@ flowchart TD
     A <-->|"stdio<br/>(JSON-RPC)"| B
     B <-->|HTTP/SSE| C
 
-    style A fill:#e1f5ff
-    style B fill:#fff4e1
-    style C fill:#e8f5e9
+    style A fill:#4a9eff,color:#000
+    style B fill:#ffb347,color:#000
+    style C fill:#66bb6a,color:#000
 ```
 
 ## Example Configurations
