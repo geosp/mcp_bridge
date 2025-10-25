@@ -6,8 +6,10 @@ Universal transport bridge for Model Context Protocol (MCP) - connect stdio-base
 
 MCP Bridge solves a common integration challenge: **MCP clients like Claude Desktop expect stdio connections, but many MCP servers run remotely over HTTP/SSE**. This bridge sits in the middle, translating between these protocols seamlessly.
 
-```
-[Claude Desktop/MCP Client] <--stdio--> [MCP Bridge] <--HTTP/SSE--> [Remote MCP Server]
+```mermaid
+graph LR
+    A[Claude Desktop/MCP Client] <-->|stdio| B[MCP Bridge]
+    B <-->|HTTP/SSE| C[Remote MCP Server]
 ```
 
 ### Use Cases
@@ -182,28 +184,67 @@ Each bridge instance will connect to its configured remote server independently.
 4. **Session Management**: Maintains session IDs across requests
 5. **Response Forwarding**: Writes responses back to stdout for the client
 
+## Known Issues & Workarounds
+
+### Claude Desktop Parameter Serialization Bug
+
+**Issue**: Claude Desktop incorrectly serializes complex object parameters when calling MCP tools. Object and array parameters are converted to JSON strings instead of being preserved as objects in the JSON-RPC payload sent to MCP servers.
+
+**Example of the bug**:
+```json
+// Expected by MCP servers:
+{"arguments": {"filter": {"lastName": "Fajardo"}}}
+
+// Actual from Claude Desktop:
+{"arguments": {"filter": "{\"lastName\": \"Fajardo\"}"}}
+```
+
+**Impact**:
+- MCP servers reject these calls with "Input validation error"
+- Any MCP tool with object or array parameters fails to work correctly
+- Affects tools like database filters, complex configurations, nested data structures
+
+**MCP Bridge Workaround**:
+This bridge **automatically detects and fixes** stringified parameters before forwarding requests to your MCP server. The workaround:
+
+1. Detects when parameter values are JSON strings instead of objects/arrays
+2. Safely deserializes them back to the correct type
+3. Forwards the corrected parameters to your MCP server
+4. Logs when corrections are made (visible in stderr logs)
+
+**What this means for you**:
+- ✅ Your MCP tools with object/array parameters will work correctly
+- ✅ No changes needed to your MCP server code
+- ✅ Automatic and transparent - no configuration required
+- ✅ Safe - invalid JSON strings are preserved as-is
+
+**Example log output**:
+```
+[Bridge] Fixed stringified params: filter:dict, tags:list
+[Bridge] Sending: tools/call (id=123)
+```
+
+**Status**:
+- Bug reported to Anthropic ([link to your bug report once filed])
+- This workaround is temporary until Claude Desktop is fixed
+- The workaround is safe and will not cause issues once the bug is resolved
+
+**Technical details**: The deserialization logic is in [`bridge.py:16-63`](src/mcp_bridge/bridge.py) and is applied in the `send_message()` method before forwarding requests to the HTTP server.
+
 ## Architecture
 
-```
-┌─────────────────┐
-│ Claude Desktop  │
-│  (MCP Client)   │
-└────────┬────────┘
-         │ stdio (JSON-RPC)
-         │
-┌────────▼────────┐
-│   MCP Bridge    │
-│  - Read stdin   │
-│  - HTTP client  │
-│  - SSE parser   │
-│  - Write stdout │
-└────────┬────────┘
-         │ HTTP/SSE
-         │
-┌────────▼────────┐
-│  Remote MCP     │
-│     Server      │
-└─────────────────┘
+```mermaid
+flowchart TD
+    A["Claude Desktop<br/>(MCP Client)"]
+    B["MCP Bridge<br/>• Read stdin<br/>• HTTP client<br/>• SSE parser<br/>• Write stdout"]
+    C["Remote MCP<br/>Server"]
+
+    A <-->|"stdio<br/>(JSON-RPC)"| B
+    B <-->|HTTP/SSE| C
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#e8f5e9
 ```
 
 ## Example Configurations

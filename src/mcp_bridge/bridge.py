@@ -13,6 +13,55 @@ def log(message: str):
     sys.stderr.write(f"[Bridge] {message}\n")
     sys.stderr.flush()
 
+def deserialize_stringified_params(arguments: dict) -> dict:
+    """
+    Detect and fix stringified parameters that should be objects or arrays.
+
+    This is a workaround for Claude Desktop's parameter serialization bug
+    where object/array parameters are converted to JSON strings instead of
+    being preserved as objects in the JSON-RPC payload.
+
+    Bug behavior:
+    - Expected: {"filter": {"lastName": "Fajardo"}}
+    - Actual:   {"filter": "{\"lastName\": \"Fajardo\"}"}
+
+    This function detects stringified JSON and deserializes it back to
+    the correct type, allowing MCP servers to receive properly formatted
+    parameters.
+
+    Args:
+        arguments: The tool arguments dict to process
+
+    Returns:
+        Corrected arguments dict with deserialized objects/arrays
+    """
+    corrected = {}
+    fixed_params = []
+
+    for key, value in arguments.items():
+        # Only process string values that look like JSON objects or arrays
+        if isinstance(value, str) and value.strip() and value.strip()[0] in ('{', '['):
+            try:
+                parsed = json.loads(value)
+                # Accept both dicts and lists
+                if isinstance(parsed, (dict, list)):
+                    corrected[key] = parsed
+                    fixed_params.append(f"{key}:{type(parsed).__name__}")
+                else:
+                    # Successfully parsed but not an object/array, keep original
+                    corrected[key] = value
+            except json.JSONDecodeError:
+                # If it fails to parse, keep the original string
+                corrected[key] = value
+        else:
+            # Pass through non-string values unchanged
+            corrected[key] = value
+
+    if fixed_params:
+        log(f"Fixed stringified params: {', '.join(fixed_params)}")
+
+    return corrected
+
 class MCPHTTPBridge:
     def __init__(self, url: str, headers: Optional[dict] = None):
         self.url = url
@@ -23,6 +72,12 @@ class MCPHTTPBridge:
     async def send_message(self, message: dict):
         """Send a message and read SSE response"""
         try:
+            # Fix stringified parameters (workaround for Claude Desktop bug)
+            if 'arguments' in message.get('params', {}):
+                message['params']['arguments'] = deserialize_stringified_params(
+                    message['params']['arguments']
+                )
+
             method = message.get('method', 'unknown')
             msg_id = message.get('id')
             log(f"Sending: {method} (id={msg_id})")
