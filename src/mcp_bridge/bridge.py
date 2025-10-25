@@ -75,15 +75,15 @@ class MCPHTTPBridge:
             method = message.get('method', 'unknown')
             msg_id = message.get('id')
 
-            # Debug: log the raw message for tools/call
-            if method == 'tools/call':
-                log(f"Raw tools/call message: {json.dumps(message)}")
-
             # Fix stringified parameters (workaround for Claude Desktop bug)
-            if 'arguments' in message.get('params', {}):
-                message['params']['arguments'] = deserialize_stringified_params(
-                    message['params']['arguments']
-                )
+            # For tools/call, the arguments are nested in params.arguments
+            if method == 'tools/call' and 'params' in message and 'arguments' in message['params']:
+                original_args = message['params']['arguments']
+                log(f"Before fix: {json.dumps(original_args)}")
+                fixed_args = deserialize_stringified_params(original_args)
+                if fixed_args != original_args:
+                    message['params']['arguments'] = fixed_args
+                    log(f"After fix: {json.dumps(fixed_args)}")
 
             log(f"Sending: {method} (id={msg_id})")
             
