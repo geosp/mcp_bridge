@@ -79,11 +79,9 @@ class MCPHTTPBridge:
             # For tools/call, the arguments are nested in params.arguments
             if method == 'tools/call' and 'params' in message and 'arguments' in message['params']:
                 original_args = message['params']['arguments']
-                log(f"Before fix: {json.dumps(original_args)}")
                 fixed_args = deserialize_stringified_params(original_args)
                 if fixed_args != original_args:
                     message['params']['arguments'] = fixed_args
-                    log(f"After fix: {json.dumps(fixed_args)}")
 
             log(f"Sending: {method} (id={msg_id})")
             
