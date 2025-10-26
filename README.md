@@ -225,7 +225,9 @@ This bridge **automatically detects and fixes** stringified parameters before fo
 ```
 
 **Status**:
-- Bug reported to Anthropic ([link to your bug report once filed])
+- ✅ Workaround implemented and tested (as of v0.2.0)
+- ✅ Confirmed working with Claude Desktop's stringified parameters
+- Bug exists in Claude Desktop (report pending to Anthropic)
 - This workaround is temporary until Claude Desktop is fixed
 - The workaround is safe and will not cause issues once the bug is resolved
 

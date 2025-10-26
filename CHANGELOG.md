@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Automatic workaround for Claude Desktop parameter serialization bug
-  - Detects and deserializes stringified object/array parameters
+  - Detects and deserializes stringified object/array parameters in `tools/call` requests
   - Logs parameter corrections to stderr for debugging
   - Comprehensive test suite with 14 unit tests
   - Documentation in README explaining the bug and workaround
+  - ✅ Tested and confirmed working with Claude Desktop
 - CHANGELOG.md to track project changes
 
 ### Fixed
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Previously failed with "Input validation error" due to stringified parameters
   - Bridge now automatically converts `{"filter": "{\"key\":\"value\"}"}` to `{"filter": {"key":"value"}}`
   - Affects tools like database filters, complex configurations, and nested data structures
+  - Fix applied specifically to `tools/call` method where parameters are nested in `params.arguments`
 
 ## [0.2.0] - 2025
 
