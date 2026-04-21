@@ -16,9 +16,6 @@ jobs:
           - os: ubuntu-latest
             artifact: mcp-bridge-linux-x86_64
             exe_name: mcp-bridge
-          - os: macos-13
-            artifact: mcp-bridge-macos-x86_64
-            exe_name: mcp-bridge
           - os: macos-latest
             artifact: mcp-bridge-macos-arm64
             exe_name: mcp-bridge
