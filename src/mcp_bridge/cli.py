@@ -15,7 +15,7 @@ def find_config_path(config_name: Optional[str] = None) -> Path:
     """
     Find configuration file in order of precedence:
     1. Explicit path (if provided and exists)
-    2. ~/.config/mcp-bridge/<config_name or config.json>
+    2. Platform config dir (e.g. ~/.config/mcp-bridge/ on Linux)
     3. Current directory config.json (for backward compat)
     4. Old location: mcp_http_bridge/config.json (deprecated)
     """
@@ -27,7 +27,7 @@ def find_config_path(config_name: Optional[str] = None) -> Path:
             return explicit_path
     
     # 2. Check user config directory
-    config_dir = Path.home() / ".config" / "mcp-bridge"
+    config_dir = Path(click.get_app_dir("mcp-bridge"))
     if config_name:
         # Look for named config in config directory
         config_path = config_dir / config_name
@@ -111,7 +111,7 @@ def cli(ctx, config, version):
 def init(name):
     """Initialize config directory and create example config"""
     
-    config_dir = Path.home() / ".config" / "mcp-bridge"
+    config_dir = Path(click.get_app_dir("mcp-bridge"))
     config_dir.mkdir(parents=True, exist_ok=True)
     
     config_name = name if name else "config.json"
@@ -152,7 +152,7 @@ def init(name):
 def list_configs():
     """List available config files"""
     
-    config_dir = Path.home() / ".config" / "mcp-bridge"
+    config_dir = Path(click.get_app_dir("mcp-bridge"))
     
     if not config_dir.exists():
         click.echo(f"Config directory not found: {config_dir}")
